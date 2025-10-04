@@ -86,7 +86,7 @@ DAT.Globe = function(container, opts) {
 
   function init() {
 
-    container.style.color = '#fff';
+    container.style.color = '#822b2bff';
     container.style.font = '13px/20px Arial, sans-serif';
 
     var shader, uniforms, material;
@@ -103,7 +103,7 @@ DAT.Globe = function(container, opts) {
     shader = Shaders['earth'];
     uniforms = THREE.UniformsUtils.clone(shader.uniforms);
 
-    uniforms['texture'].value = THREE.ImageUtils.loadTexture('world.jpg');
+    uniforms['texture'].value = THREE.ImageUtils.loadTexture('mapa.jpg');
 
     material = new THREE.ShaderMaterial({
 
