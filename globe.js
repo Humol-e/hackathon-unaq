@@ -43,7 +43,7 @@ DAT.Globe = function(container, opts) {
         'void main() {',
           'vec3 diffuse = texture2D( texture, vUv ).xyz;',
           'float intensity = 1.05 - dot( vNormal, vec3( 0.0, 0.0, 1.0 ) );',
-          'vec3 atmosphere = vec3( 1.0, 1.0, 1.0 ) * pow( intensity, 6.0 );',
+          'vec3 atmosphere = vec3( 1.0, 1.0, 1.0 ) * pow( intensity, 3.0 );',
           'gl_FragColor = vec4( diffuse + atmosphere, 1.0 );',
         '}'
       ].join('\n')
@@ -267,6 +267,41 @@ DAT.Globe = function(container, opts) {
 
     THREE.GeometryUtils.merge(subgeo, point);
   }
+
+$('#addPointBtn').click(function () {
+    var globeInstance = globe;
+    var lat = 39.8;  // latitud
+    var lng = -98.6; // longitud
+    var color = new THREE.Color(0, 1, 0);
+    var size = 0.5;
+
+    // Si no existe la geometría base, créala
+    if (!globeInstance._baseGeometry) {
+        globeInstance._baseGeometry = new THREE.Geometry();
+    }
+
+    // Agrega el nuevo punto a la geometría base
+    addPoint(lat, lng, size * 200, color, globeInstance._baseGeometry);
+
+    // Si ya existe el mesh de puntos, elimínalo antes de crear uno nuevo
+    if (globeInstance.points) {
+        globeInstance.scene.remove(globeInstance.points);
+    }
+
+    // Crea el mesh con todos los puntos acumulados
+    globeInstance.points = new THREE.Mesh(
+        globeInstance._baseGeometry,
+        new THREE.MeshBasicMaterial({
+            color: 0xffffff,
+            vertexColors: THREE.FaceColors,
+            morphTargets: false
+        })
+    );
+    globeInstance.scene.add(globeInstance.points);
+    javascript:console.log(lat, lng);
+    alert('Punto agregado en Lat: ' + lat.toFixed(2) + ', Lng: ' + lng.toFixed(2));
+});
+
 
   function onMouseDown(event) {
     event.preventDefault();

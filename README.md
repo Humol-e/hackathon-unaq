@@ -22,7 +22,6 @@ Recibe los datos procesados y los muestra visualmente.
 4. README.md
 Archivo de documentación.
 
-Explica el propósito del proyecto y quién lo desarrolló.
 
 
 ## CHALLENGE ##
