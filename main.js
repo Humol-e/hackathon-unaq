@@ -7,7 +7,7 @@ var past = 1; // 0-1
 var upcoming = 2; // 0-2
 var artistId = '';
 var timer;
-
+   
 // inputs
 $('#searchBtn').click(function () {
     search();
