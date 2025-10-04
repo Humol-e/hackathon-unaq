@@ -272,7 +272,7 @@ $('#addPointBtn').click(function () {
     var globeInstance = globe;
     var lat = 39.8;  // latitud
     var lng = -98.6; // longitud
-    var color = new THREE.Color(0, 1, 0);
+    var color = new THREE.Color(0,   1, 0);
     var size = 0.5;
 
     // Si no existe la geometría base, créala
