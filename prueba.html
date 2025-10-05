@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asteroides NASA</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 32px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .loading {
+            text-align: center;
+            color: #3498db;
+            font-size: 18px;
+            padding: 20px;
+        }
+
+        .select-wrapper {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #34495e;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+        }
+
+        select:hover {
+            border-color: #3498db;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #2980b9;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 25px;
+            border-radius: 15px;
+            color: white;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .info-card.show {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .info-row:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            opacity: 0.9;
+        }
+
+        .info-value {
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .hazardous {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .hazardous.yes {
+            background: #e74c3c;
+        }
+
+        .hazardous.no {
+            background: #2ecc71;
+        }
+
+        .error {
+            background: #e74c3c;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌌 Asteroides Cercanos a la Tierra</h1>
+        <p class="subtitle">Datos de NASA NEO (Near Earth Objects)</p>
+        
+        <div id="loading" class="loading">Cargando asteroides... 🚀</div>
+        <div id="error" class="error" style="display: none;"></div>
+        
+        <div id="content" style="display: none;">
+            <div class="select-wrapper">
+                <label for="asteroidSelect">Selecciona un asteroide:</label>
+                <select id="asteroidSelect">
+                    <option value="">-- Elige un asteroide --</option>
+                </select>
+            </div>
+
+            <div id="infoCard" class="info-card"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://api.nasa.gov/neo/rest/v1/neo/browse?page=10&api_key=mLmqqYRXRZqThwq2VjWkG7rJkAw9ejweI1a14tH2';
+        
+        let asteroidData = [];
+
+        async function loadAsteroids() {
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                
+                // Extraer todos los asteroides de todas las fechas
+                const nearEarthObjects = data.near_earth_objects;
+                asteroidData = [];
+                
+                for (const date in nearEarthObjects) {
+                    asteroidData = asteroidData.concat(nearEarthObjects[date]);
+                }
+
+                populateDropdown();
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+                
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').textContent = 'Error al cargar los datos: ' + error.message;
+            }
+        }
+
+        function populateDropdown() {
+            const select = document.getElementById('asteroidSelect');
+            
+            asteroidData.forEach((asteroid, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = asteroid.name;
+                select.appendChild(option);
+            });
+
+            select.addEventListener('change', (e) => {
+                const index = e.target.value;
+                if (index !== '') {
+                    showAsteroidInfo(asteroidData[index]);
+                } else {
+                    document.getElementById('infoCard').classList.remove('show');
+                }
+            });
+        }
+
+        function showAsteroidInfo(asteroid) {
+            const infoCard = document.getElementById('infoCard');
+            const closeApproach = asteroid.close_approach_data[0];
+            const diameter = asteroid.estimated_diameter.kilometers;
+            
+            infoCard.innerHTML = `
+                <h3 style="margin-bottom: 20px; font-size: 20px;">${asteroid.name}</h3>
+                
+                <div class="info-row">
+                    <span class="info-label">ID NASA:</span>
+                    <span class="info-value">${asteroid.id}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Magnitud Absoluta:</span>
+                    <span class="info-value">${asteroid.absolute_magnitude_h}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Diámetro Estimado:</span>
+                    <span class="info-value">${diameter.estimated_diameter_min.toFixed(2)} - ${diameter.estimated_diameter_max.toFixed(2)} km</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Fecha de Aproximación:</span>
+                    <span class="info-value">${closeApproach.close_approach_date_full}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Velocidad:</span>
+                    <span class="info-value">${parseFloat(closeApproach.relative_velocity.kilometers_per_hour).toLocaleString()} km/h</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Distancia de Paso:</span>
+                    <span class="info-value">${parseFloat(closeApproach.miss_distance.kilometers).toLocaleString()} km</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Potencialmente Peligroso:</span>
+                    <span class="info-value">
+                        <span class="hazardous ${asteroid.is_potentially_hazardous_asteroid ? 'yes' : 'no'}">
+                            ${asteroid.is_potentially_hazardous_asteroid ? 'SÍ ⚠️' : 'NO ✓'}
+                        </span>
+                    </span>
+                </div>
+            `;
+            
+            infoCard.classList.add('show');
+        }
+
+        // Cargar datos al iniciar
+        loadAsteroids();
+    </script>
+</body>
+</html>

@@ -209,12 +209,22 @@ ul li{margin:4px 0}
 <div class="grid">
   <!-- COLUMNA IZQUIERDA: PARÁMETROS -->
   <div class="card">
-    <h3 id="paramsTitle">⚙️ Simulación del asteroide</h3>
+    <h3 id="paramsTitle">⚙️ NASA NEO DATA</h3>
 
 <div class="form-group">
-  <label for="asteroidSearch">Buscar asteroide por nombre:</label>
-  <input id="asteroidSearch" type="text" placeholder="Ejemplo: Geographos" />
-  <button id="searchAsteroidBtn">Buscar</button>
+        
+        <div id="loading" class="loading">Cargando asteroides... 🚀</div>
+        <div id="error" class="error" style="display: none;"></div>
+        
+        <div id="content" style="display: none;">
+                <label for="asteroidSelect">Selecciona un asteroide:</label>
+                <select id="asteroidSelect">
+                    <option value="">-- Elige un asteroide --</option>
+                </select>
+              <div id="infoCard" class="info-card"></div>
+           </div>
+
+
 </div>
 <ul id="asteroidResults"></ul>
     <div class="form-group">
@@ -350,7 +360,7 @@ let currentLang = 'es';
 
 const translations = {
   es: {
-    mainTitle: '🌠 Delta´s Madness',
+    mainTitle: '🌠 Delta´s Madness NEO-SIM',
     mainSubtitle: 'Simulador de impactos meteóricos y estrategias de deflexión',
     paramsTitle: '⚙️ Parámetros del Meteorito/Asteroide',
     labelDiameter: 'Diámetro (m)',
@@ -423,7 +433,7 @@ labelAngle: 'Ángulo de entrada (°)',
     megatonsTNT: 'Megatones TNT'
   },
   en: {
-    mainTitle: '🌠 Delta´s Madness',
+    mainTitle: '🌠 Delta´s Madness NEO-SIM',
     mainSubtitle: 'Simulator for meteor impacts and deflection strategies',
     paramsTitle: '⚙️ Meteor/Asteroid Parameters',
     labelDiameter: 'Diameter (m)',
@@ -782,53 +792,109 @@ function assessFireRisk(energy, ecosystemData){
   
   return riskWords.none;
 }
-let allAsteroids = [];
 
-async function fetchAsteroids(pages = 3) {
-    allAsteroids = [];
-    for (let i = 0; i < pages; i++) {
-        const url = `https://api.nasa.gov/neo/rest/v1/neo/browse?page=${i}&api_key=mLmqqYRXRZqThwq2VjWkG7rJkAw9ejweI1a14tH2`;
-        try {
-            const response = await fetch(url);
-            if (!response.ok) continue;
-            const data = await response.json();
-            if (!data) continue;
-            allAsteroids = allAsteroids.concat(data.near_earth_objects);
-        } catch (err) {
-            console.error("Error en fetch:", err);
+  
+        const API_URL = 'https://api.nasa.gov/neo/rest/v1/neo/browse?page=10&api_key=mLmqqYRXRZqThwq2VjWkG7rJkAw9ejweI1a14tH2';
+        
+        let asteroidData = [];
+
+        async function loadAsteroids() {
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                
+                // Extraer todos los asteroides de todas las fechas
+                const nearEarthObjects = data.near_earth_objects;
+                asteroidData = [];
+                
+                for (const date in nearEarthObjects) {
+                    asteroidData = asteroidData.concat(nearEarthObjects[date]);
+                }
+
+                populateDropdown();
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+                
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').textContent = 'Error al cargar los datos: ' + error.message;
+            }
         }
-    }
-    console.log("Asteroides cargados:", allAsteroids.length);
-}
 
-// Función para buscar y mostrar resultados
-function searchAsteroids() {
-    const query = document.getElementById('asteroidSearch').value.trim().toLowerCase();
-    const results = allAsteroids.filter(ast => ast.name.toLowerCase().includes(query));
-    const resultsList = document.getElementById('asteroidResults');
-    resultsList.innerHTML = '';
-    if (results.length === 0) {
-        resultsList.innerHTML = '<li>No se encontraron asteroides.</li>';
-        return;
-    }
-    results.forEach(ast => {
-        const diamMin = ast.estimated_diameter.kilometers.estimated_diameter_min.toFixed(3);
-        const diamMax = ast.estimated_diameter.kilometers.estimated_diameter_max.toFixed(3);
-        let distancia = 'N/A';
-        if (ast.close_approach_data && ast.close_approach_data.length > 0) {
-            distancia = ast.close_approach_data[0].miss_distance.kilometers;
+        function populateDropdown() {
+            const select = document.getElementById('asteroidSelect');
+            
+            asteroidData.forEach((asteroid, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = asteroid.name;
+                select.appendChild(option);
+            });
+
+            select.addEventListener('change', (e) => {
+                const index = e.target.value;
+                if (index !== '') {
+                    showAsteroidInfo(asteroidData[index]);
+                } else {
+                    document.getElementById('infoCard').classList.remove('show');
+                }
+            });
         }
-        resultsList.innerHTML += `<li>
-            <strong>${ast.name}</strong> | Diámetro: ${diamMin} - ${diamMax} km | Distancia: ${distancia} km
-        </li>`;
-    });
-}
 
-// Evento para el botón de búsqueda
-document.getElementById('searchAsteroidBtn').addEventListener('click', searchAsteroids);
-document.getElementById('asteroidSearch').addEventListener('keyup', function(e) {
-    if (e.key === 'Enter') searchAsteroids();
-});
+        function showAsteroidInfo(asteroid) {
+            const infoCard = document.getElementById('infoCard');
+            const closeApproach = asteroid.close_approach_data[0];
+            const diameter = asteroid.estimated_diameter.kilometers;
+            
+            infoCard.innerHTML = `
+                <h3 style="margin-bottom: 20px; font-size: 20px;">${asteroid.name}</h3>
+                
+                <div class="info-row">
+                    <span class="info-label">ID NASA:</span>
+                    <span class="info-value">${asteroid.id}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Magnitud Absoluta:</span>
+                    <span class="info-value">${asteroid.absolute_magnitude_h}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Diámetro Estimado:</span>
+                    <span class="info-value">${diameter.estimated_diameter_min.toFixed(2)} - ${diameter.estimated_diameter_max.toFixed(2)} km</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Fecha de Aproximación:</span>
+                    <span class="info-value">${closeApproach.close_approach_date_full}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Velocidad:</span>
+                    <span class="info-value">${parseFloat(closeApproach.relative_velocity.kilometers_per_hour).toLocaleString()} km/h</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Distancia de Paso:</span>
+                    <span class="info-value">${parseFloat(closeApproach.miss_distance.kilometers).toLocaleString()} km</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Potencialmente Peligroso:</span>
+                    <span class="info-value">
+                        <span class="hazardous ${asteroid.is_potentially_hazardous_asteroid ? 'yes' : 'no'}">
+                            ${asteroid.is_potentially_hazardous_asteroid ? 'SÍ ⚠️' : 'NO ✓'}
+                        </span>
+                    </span>
+                </div>
+            `;
+            
+            infoCard.classList.add('show');
+        }
+
+        // Cargar datos al iniciar
+        loadAsteroids();
 
 function toSeconds(years){return years*365.25*24*3600;}
 function getObjectDensity(objectType) {
