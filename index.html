@@ -209,9 +209,16 @@ ul li{margin:4px 0}
 <div class="grid">
   <!-- COLUMNA IZQUIERDA: PARÁMETROS -->
   <div class="card">
-    <h3 id="paramsTitle">⚙️ Parámetros del Meteorito/Asteroide</h3>
-
+    <h3 id="paramsTitle">⚙️ Simulación del asteroide</h3>
+<div class="form-group">
+  <label for="asteroidSearch">Buscar asteroide por nombre:</label>
+  <input id="asteroidSearch" type="text" placeholder="Ejemplo: Geographos" />
+  <button id="searchAsteroidBtn">Buscar</button>
+</div>
+<ul id="asteroidResults"></ul>
     <div class="form-group">
+          <h3 id="paramsTitle">⚙️ Asteroide personalizado</h3>
+
       <label id="labelMass">Masa (kg)</label>
       <input id="mass" type="number" value="1000000" min="1" />
     </div>
