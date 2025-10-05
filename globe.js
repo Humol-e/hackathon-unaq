@@ -158,11 +158,12 @@ DAT.Globe = function(container, opts) {
       overRenderer = false;
     }, false);
   }
-
   // Función para crear un círculo de mapa de calor (relleno con gradiente)
   function createHeatmapCircle(lat, lng, radius) {
+
+
+    radius = radius /229000;
     var heatmapGroup = new THREE.Object3D();
-    
     // Crear múltiples anillos concéntricos para simular gradiente suave
     var rings = 15;
     
@@ -194,7 +195,8 @@ DAT.Globe = function(container, opts) {
       
       if (currentRadius > 0.3 || ring === 0) {
         var circle = createFilledCircleOnSphere(lat, lng, currentRadius, color, opacity);
-        heatmapGroup.add(circle);
+        heatmapGroup.add(circle);            //son aprox 228km por unidad
+
       }
     }
 
@@ -397,7 +399,7 @@ DAT.Globe = function(container, opts) {
  
     var color = new THREE.Color(0,   1, 0);
     var size = 0.5;
-    var heatmapRadius = 10;
+    var heatmapRadius = window.ejectaDist ; // Usa el valor global, o 10 si no existe
     globeInstance.reset();
     globeInstance.clearHeatmaps();
 

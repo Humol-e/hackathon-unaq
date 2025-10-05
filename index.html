@@ -863,7 +863,7 @@ async function calculateAll(){
       ${t.range}: ${ejectaDist >= 1000 ? (ejectaDist/1000).toFixed(2) + ' km' : ejectaDist + ' m'}
       <div class="small">${t.rockyMaterial}</div>
     </div>`;
-
+window.ejectaDist = ejectaDist;
     impactHtml+=`<div class="result-item">
       <strong>${t.impactLocation}</strong>
       <div class="location-info">
