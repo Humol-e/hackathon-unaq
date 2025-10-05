@@ -1,14 +1,6 @@
 /**
- * dat.globe Javascript WebGL Globe Toolkit
- * http://dataarts.github.com/dat.globe
- *
- * Copyright 2011 Data Arts Team, Google Creative Lab
- *
- * Licensed under the Apache License, Version 2.0 (the 'License');
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * dat.globe Javascript WebGL Globe Toolkit con Mapa de Calor
+ * Modificado para incluir áreas de influencia visuales tipo heatmap
  */
 
 var DAT = DAT || {};
@@ -83,6 +75,9 @@ DAT.Globe = function(container, opts) {
   var distance = 100000, distanceTarget = 100000;
   var padding = 40;
   var PI_HALF = Math.PI / 2;
+
+  // Array para almacenar los radios de destrucción (heatmaps)
+  var heatmapCircles = [];
 
   function init() {
 
@@ -164,12 +159,137 @@ DAT.Globe = function(container, opts) {
     }, false);
   }
 
+  // Función para crear un círculo de mapa de calor (relleno con gradiente)
+  function createHeatmapCircle(lat, lng, radius) {
+    var heatmapGroup = new THREE.Object3D();
+    
+    // Crear múltiples anillos concéntricos para simular gradiente suave
+    var rings = 15;
+    
+    for (var ring = rings - 1; ring >= 0; ring--) {
+      var normalizedRing = ring / (rings - 1);
+      var currentRadius = radius * normalizedRing;
+      
+      // Calcular color y opacidad basado en la distancia al centro
+      // normalizedRing = 0 es el centro, 1 es el borde exterior
+      var color, opacity;
+      
+      if (normalizedRing < 0.33) {
+        // Centro: rojo intenso
+        color = 0xFF0000;
+        opacity = 0.7 - (normalizedRing * 0.2);
+      } else if (normalizedRing < 0.66) {
+        // Medio: naranja
+        var t = (normalizedRing - 0.33) / 0.33;
+        var r = 255;
+        var g = Math.floor(128 * (1 + t));
+        var b = 0;
+        color = (r << 16) | (g << 8) | b;
+        opacity = 0.6 - (normalizedRing * 0.3);
+      } else {
+        // Exterior: amarillo
+        color = 0xFFFF00;
+        opacity = 0.45 - (normalizedRing * 0.35);
+      }
+      
+      if (currentRadius > 0.3 || ring === 0) {
+        var circle = createFilledCircleOnSphere(lat, lng, currentRadius, color, opacity);
+        heatmapGroup.add(circle);
+      }
+    }
+
+    scene.add(heatmapGroup);
+    heatmapCircles.push(heatmapGroup);
+    
+    return heatmapGroup;
+  }
+
+  // Función para crear un círculo relleno en la superficie de la esfera
+  function createFilledCircleOnSphere(lat, lng, radius, colorHex, opacity) {
+    var segments = 48;
+    var geometry = new THREE.Geometry();
+    
+    // Convertir el radio de grados a radianes
+    var angularRadius = radius * Math.PI / 180;
+    
+    // Centro del círculo - usar la misma conversión que addPoint
+    var phi = (90 - lat) * Math.PI / 180;
+    var theta = (180 - lng) * Math.PI / 180;
+    var radiusOffset = 201; // Ligeramente por encima de la superficie
+    
+    var centerVertex = new THREE.Vector3(
+      radiusOffset * Math.sin(phi) * Math.cos(theta),
+      radiusOffset * Math.cos(phi),
+      radiusOffset * Math.sin(phi) * Math.sin(theta)
+    );
+    geometry.vertices.push(centerVertex);
+    
+    // Crear vértices del perímetro
+    var perimeterVertices = [];
+    for (var i = 0; i <= segments; i++) {
+      var angle = (i / segments) * Math.PI * 2;
+      
+      // Usar fórmula esférica correcta para calcular puntos alrededor
+      var latRad = lat * Math.PI / 180;
+      
+      // Calcular nueva latitud
+      var newLat = Math.asin(
+        Math.sin(latRad) * Math.cos(angularRadius) +
+        Math.cos(latRad) * Math.sin(angularRadius) * Math.cos(angle)
+      );
+      
+      // Calcular nueva longitud
+      var y = Math.sin(angle) * Math.sin(angularRadius) * Math.cos(latRad);
+      var x = Math.cos(angularRadius) - Math.sin(latRad) * Math.sin(newLat);
+      var newLng = ((lng * Math.PI / 180) + Math.atan2(y, x)) * 180 / Math.PI;
+      var newLatDeg = newLat * 180 / Math.PI;
+      
+      // Convertir a 3D usando la misma fórmula que addPoint
+      var newPhi = (90 - newLatDeg) * Math.PI / 180;
+      var newTheta = (180 - newLng) * Math.PI / 180;
+      
+      var vertex = new THREE.Vector3(
+        radiusOffset * Math.sin(newPhi) * Math.cos(newTheta),
+        radiusOffset * Math.cos(newPhi),
+        radiusOffset * Math.sin(newPhi) * Math.sin(newTheta)
+      );
+      
+      geometry.vertices.push(vertex);
+      perimeterVertices.push(i + 1);
+    }
+    
+    // Crear caras (triángulos desde el centro hacia el perímetro)
+    var color = new THREE.Color(colorHex);
+    for (var i = 0; i < segments; i++) {
+      var face = new THREE.Face3(0, perimeterVertices[i], perimeterVertices[i + 1]);
+      face.color = color;
+      geometry.faces.push(face);
+    }
+    
+    geometry.computeFaceNormals();
+    
+    var material = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      vertexColors: THREE.FaceColors,
+      opacity: opacity,
+      transparent: true,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+      blending: THREE.NormalBlending
+    });
+    
+    var circle = new THREE.Mesh(geometry, material);
+    return circle;
+  }
+
   addData = function(data, opts) {
     var lat, lng, size, color, i, step, colorFnWrapper;
 
     opts.animated = opts.animated || false;
     this.is_animated = opts.animated;
-    opts.format = opts.format || 'magnitude'; // other option is 'legend'
+    opts.format = opts.format || 'magnitude';
+    opts.heatmapRadius = opts.heatmapRadius || 8;
+    
     console.log(opts.format);
     if (opts.format === 'magnitude') {
       step = 3;
@@ -187,7 +307,6 @@ DAT.Globe = function(container, opts) {
         for (i = 0; i < data.length; i += step) {
           lat = data[i];
           lng = data[i + 1];
-//        size = data[i + 2];
           color = colorFnWrapper(data,i);
           size = 0;
           addPoint(lat, lng, size, color, this._baseGeometry);
@@ -208,6 +327,9 @@ DAT.Globe = function(container, opts) {
       size = data[i + 2];
       size = size*200;
       addPoint(lat, lng, size, color, subgeo);
+      
+      // Crear mapa de calor para cada punto
+      createHeatmapCircle(lat, lng, opts.heatmapRadius);
     }
     if (opts.animated) {
       this._baseGeometry.morphTargets.push({'name': opts.name, vertices: subgeo.vertices});
@@ -268,12 +390,13 @@ DAT.Globe = function(container, opts) {
     THREE.GeometryUtils.merge(subgeo, point);
   }
 
-$('#addPointBtn').click(function () {
+  $('#addPointBtn').click(function () {
     var globeInstance = globe;
     var lat = 39.8;  // latitud
     var lng = -98.6; // longitud
     var color = new THREE.Color(0,   1, 0);
     var size = 0.5;
+    var heatmapRadius = 10;
 
     // Si no existe la geometría base, créala
     if (!globeInstance._baseGeometry) {
@@ -282,6 +405,9 @@ $('#addPointBtn').click(function () {
 
     // Agrega el nuevo punto a la geometría base
     addPoint(lat, lng, size * 200, color, globeInstance._baseGeometry);
+
+    // Crear mapa de calor
+    createHeatmapCircle(lat, lng, heatmapRadius);
 
     // Si ya existe el mesh de puntos, elimínalo antes de crear uno nuevo
     if (globeInstance.points) {
@@ -298,9 +424,9 @@ $('#addPointBtn').click(function () {
         })
     );
     globeInstance.scene.add(globeInstance.points);
-    javascript:console.log(lat, lng);
-    alert('Punto agregado en Lat: ' + lat.toFixed(2) + ', Lng: ' + lng.toFixed(2));
-});
+    console.log(lat, lng);
+    alert('Punto agregado en Lat: ' + lat.toFixed(2) + ', Lng: ' + lng.toFixed(2) + ' con heatmap de ' + heatmapRadius + '°');
+  });
 
 
   function onMouseDown(event) {
@@ -434,7 +560,21 @@ $('#addPointBtn').click(function () {
   function reset() {
     scene.remove(this.points);
     this.points = null;
+    
+    // Limpiar heatmaps
+    for (var i = 0; i < heatmapCircles.length; i++) {
+      scene.remove(heatmapCircles[i]);
+    }
+    heatmapCircles = [];
   }
+
+  // Función para limpiar todos los heatmaps
+  this.clearHeatmaps = function() {
+    for (var i = 0; i < heatmapCircles.length; i++) {
+      scene.remove(heatmapCircles[i]);
+    }
+    heatmapCircles = [];
+  };
 
   this.addData = addData;
   this.createPoints = createPoints;
@@ -445,4 +585,3 @@ $('#addPointBtn').click(function () {
   return this;
 
 };
-
