@@ -197,7 +197,7 @@ ul li{margin:4px 0}
 <div class="container">
 <div class="header">
   <div>
-    <h1 id="mainTitle"><img src="logo.png" alt="Icono de meteorito" width="40" height="40" style="vertical-align: middle; margin-right: 10px;"> Delta's Madness</h1>
+    <h1 id="mainTitle"><img src="logo.png" alt="Icono de meteorito" width="40" height="40" style="vertical-align: middle; margin-right: 10px;"> Delta's Madness NEO-SIM</h1>
     <p class="lead" id="mainSubtitle">Simulador de impactos meteóricos y estrategias de deflexión</p>
   </div>
   <div class="lang-selector">
@@ -855,7 +855,7 @@ function assessFireRisk(energy, ecosystemData){
 }
 
   
-        const API_URL = 'https://api.nasa.gov/neo/rest/v1/neo/browse?page=18&api_key=mLmqqYRXRZqThwq2VjWkG7rJkAw9ejweI1a14tH2';
+        const API_URL = 'https://api.nasa.gov/neo/rest/v1/neo/browse?page=1598&api_key=mLmqqYRXRZqThwq2VjWkG7rJkAw9ejweI1a14tH2';
         
         let asteroidData = [];
 
@@ -895,7 +895,7 @@ function assessFireRisk(energy, ecosystemData){
 
             select.addEventListener('change', (e) => {
                 const index = e.target.value;
-                if (index !== '') {
+                if (index !== 100) {
                     showAsteroidInfo(asteroidData[index]);
                 } else {
                     document.getElementById('infoCard').classList.remove('show');
