@@ -350,16 +350,16 @@ let currentLang = 'es';
 
 const translations = {
   es: {
-    mainTitle: 'Delta´s Madness',
+    mainTitle: '🌠 Delta´s Madness',
     mainSubtitle: 'Simulador de impactos meteóricos y estrategias de deflexión',
     paramsTitle: '⚙️ Parámetros del Meteorito/Asteroide',
     labelDiameter: 'Diámetro (m)',
-    labelType: 'Tipo de objeto',
-    optionRocky: 'Rocoso (asteroide tipo S)',
-    optionMetallic: 'Metálico (asteroide tipo M)',
-    optionCometary: 'Cometario (hielo y roca)',
-    labelVelocity: 'Velocidad (m/s)',
-    labelAngle: 'Ángulo de entrada (°)',
+labelType: 'Tipo de objeto',
+optionRocky: 'Rocoso (asteroide tipo S)',
+optionMetallic: 'Metálico (asteroide tipo M)',
+optionCometary: 'Cometario (hielo y roca)',
+labelVelocity: 'Velocidad (m/s)',
+labelAngle: 'Ángulo de entrada (°)',
     labelGravity: 'Gravedad local (m/s²)',
     locationTitle: '📍 Ubicación del Impacto',
     labelLat: 'Latitud',
@@ -423,16 +423,16 @@ const translations = {
     megatonsTNT: 'Megatones TNT'
   },
   en: {
-    mainTitle: 'Delta´s Madness',
+    mainTitle: '🌠 Delta´s Madness',
     mainSubtitle: 'Simulator for meteor impacts and deflection strategies',
     paramsTitle: '⚙️ Meteor/Asteroid Parameters',
     labelDiameter: 'Diameter (m)',
-    labelType: 'Object type',
-    optionRocky: 'Rocky (S-type asteroid)',
-    optionMetallic: 'Metallic (M-type asteroid)',
-    optionCometary: 'Cometary (ice and rock)',
-    labelVelocity: 'Velocity (m/s)',
-    labelAngle: 'Entry angle (°)',
+labelType: 'Object type',
+optionRocky: 'Rocky (S-type asteroid)',
+optionMetallic: 'Metallic (M-type asteroid)',
+optionCometary: 'Cometary (ice and rock)',
+labelVelocity: 'Velocity (m/s)',
+labelAngle: 'Entry angle (°)',
     labelGravity: 'Local gravity (m/s²)',
     locationTitle: '📍 Impact Location',
     labelLat: 'Latitude',
@@ -506,16 +506,16 @@ function setLang(lang) {
 
 function updateTranslations() {
   const t = translations[currentLang];
-  document.getElementById('mainTitle').innerHTML = `<img src="logo.png" alt="Icono de meteorito" width="40" height="40" style="vertical-align: middle; margin-right:10px;"> ${t.mainTitle}`;
+  document.getElementById('mainTitle').textContent = t.mainTitle;
   document.getElementById('mainSubtitle').textContent = t.mainSubtitle;
   document.getElementById('paramsTitle').textContent = t.paramsTitle;
   document.getElementById('labelDiameter').textContent = t.labelDiameter;
-  document.getElementById('labelType').textContent = t.labelType;
-  document.getElementById('optionRocky').textContent = t.optionRocky;
-  document.getElementById('optionMetallic').textContent = t.optionMetallic;
-  document.getElementById('optionCometary').textContent = t.optionCometary;
-  document.getElementById('labelVelocity').textContent = t.labelVelocity;
-  document.getElementById('labelAngle').textContent = t.labelAngle;
+document.getElementById('labelType').textContent = t.labelType;
+document.getElementById('optionRocky').textContent = t.optionRocky;
+document.getElementById('optionMetallic').textContent = t.optionMetallic;
+document.getElementById('optionCometary').textContent = t.optionCometary;
+document.getElementById('labelVelocity').textContent = t.labelVelocity;
+document.getElementById('labelAngle').textContent = t.labelAngle;
   document.getElementById('labelGravity').textContent = t.labelGravity;
   document.getElementById('locationTitle').textContent = t.locationTitle;
   document.getElementById('labelLat').textContent = t.labelLat;
@@ -787,16 +787,19 @@ let allAsteroids = [];
 async function fetchAsteroids(pages = 3) {
     allAsteroids = [];
     for (let i = 0; i < pages; i++) {
-        const response = await fetch(`/asteroids?page=${i}`);
-        if (!response.ok) continue;
-        const data = await response.json();
-        if (!data) continue;
-        allAsteroids = allAsteroids.concat(data.near_earth_objects);
+        const url = `https://api.nasa.gov/neo/rest/v1/neo/browse?page=${i}&api_key=mLmqqYRXRZqThwq2VjWkG7rJkAw9ejweI1a14tH2`;
+        try {
+            const response = await fetch(url);
+            if (!response.ok) continue;
+            const data = await response.json();
+            if (!data) continue;
+            allAsteroids = allAsteroids.concat(data.near_earth_objects);
+        } catch (err) {
+            console.error("Error en fetch:", err);
+        }
     }
+    console.log("Asteroides cargados:", allAsteroids.length);
 }
-
-// Llama a la función al cargar la página
-fetchAsteroids(3);
 
 // Función para buscar y mostrar resultados
 function searchAsteroids() {

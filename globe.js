@@ -429,7 +429,7 @@ DAT.Globe = function(container, opts) {
     );
     globeInstance.scene.add(globeInstance.points);
     console.log(lat, lng);
-    alert('Punto agregado en Lat: ' + lat.toFixed(2) + ', Lng: ' + lng.toFixed(2) + ' con heatmap de ' + heatmapRadius + '°');
+    // alert('Punto agregado en Lat: ' + lat.toFixed(2) + ', Lng: ' + lng.toFixed(2) + ' con heatmap de ' + heatmapRadius + '°');
   });
 
 
