@@ -1,0 +1,70 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <title>Music Gloeebe</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head> 
+<body>
+
+  <div id="container"></div>
+
+  <div id="info">
+    Made by <a >emi</a> <span class="bull">&bull;</span>
+    <button id="addPointBtn" class="btn btn-success">Agregar punto aquí</button>
+  </div>
+
+  <div id="description">
+    <p>
+      simulador de daños por meteoro. <br>
+      The highest a bar is, the more often the artist played at that location.
+    </p>
+  </div>
+
+  <button id="tray" type="button" class="btn btn-default btn-xs">
+    <span class="glyphicon glyphicon-th-list"></span>
+  </button>
+
+  <div id="title">
+    <div class="input-group">
+      <input id="artistName" type="text" class="form-control" placeholder="Meteoro">
+      <div class="input-group-btn">
+        <button id="searchBtn" class="btn btn-primary" type="button">Search</button>
+        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>
+        <ul class="dropdown-menu pull-right">
+          <li><a href="#raw">Search on Bandsintown by name</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="cbs">
+      <label class="checkbox-inline">
+        <input type="checkbox" id="past" checked> Past
+      </label>
+      <label class="checkbox-inline">
+        <input type="checkbox" id="upcoming" checked> Upcoming
+      </label>
+    </div>
+
+    <div id="error" class="alert alert-danger"></div>
+
+    <div id="infos">
+      <h2 id="artist"> </h2>
+      <ul id="top10" class="list-group"></ul>
+    </div>
+
+    <div id="artists" class="list-group"><div>
+
+  </div>
+
+  <script type="text/javascript" src="lib/Detector.js"></script>
+  <script type="text/javascript" src="lib/three.min.js"></script>
+  <script type="text/javascript" src="lib/Tween.js"></script>
+  <script type="text/javascript" src="lib/jquery-2.1.0.min.js"></script>
+  <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="globe.js"></script>
+  <script type="text/javascript" src="main.js"></script>
+
+</body>
+
+</html>
