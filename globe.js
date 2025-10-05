@@ -98,7 +98,7 @@ DAT.Globe = function(container, opts) {
     shader = Shaders['earth'];
     uniforms = THREE.UniformsUtils.clone(shader.uniforms);
 
-    uniforms['texture'].value = THREE.ImageUtils.loadTexture('mapa.jpg');
+    uniforms['texture'].value = THREE.ImageUtils.loadTexture('mapa.png');
 
     material = new THREE.ShaderMaterial({
 
@@ -394,7 +394,7 @@ DAT.Globe = function(container, opts) {
     var globeInstance = globe;
     var lat = 39.8;  // latitud
     var lng = -98.6; // longitud
-    var color = new THREE.Color(0, 1, 0);
+    var color = new THREE.Color(0,   1, 0);
     var size = 0.5;
     var heatmapRadius = 10;
 
