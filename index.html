@@ -794,7 +794,7 @@ function assessFireRisk(energy, ecosystemData){
 }
 
   
-        const API_URL = 'https://api.nasa.gov/neo/rest/v1/neo/browse?page=10&api_key=mLmqqYRXRZqThwq2VjWkG7rJkAw9ejweI1a14tH2';
+        const API_URL = 'https://api.nasa.gov/neo/rest/v1/neo/browse?page=18&api_key=mLmqqYRXRZqThwq2VjWkG7rJkAw9ejweI1a14tH2';
         
         let asteroidData = [];
 
@@ -884,7 +884,7 @@ function assessFireRisk(energy, ecosystemData){
                     <span class="info-label">Potencialmente Peligroso:</span>
                     <span class="info-value">
                         <span class="hazardous ${asteroid.is_potentially_hazardous_asteroid ? 'yes' : 'no'}">
-                            ${asteroid.is_potentially_hazardous_asteroid ? 'SÍ ⚠️' : 'NO ✓'}
+                            ${asteroid.is_potentially_hazardous_asteroid ? 'SÍ ' : 'NO '}
                         </span>
                     </span>
                 </div>
