@@ -390,18 +390,20 @@ DAT.Globe = function(container, opts) {
     THREE.GeometryUtils.merge(subgeo, point);
   }
 
-  $('#addPointBtn').click(function () {
+  $('#calcBtn').click(function () {
     var globeInstance = globe;
-    var lat = 39.8;  // latitud
-    var lng = -98.6; // longitud
+   var lat = parseFloat(document.getElementById('lat').value);
+    var lng = parseFloat(document.getElementById('lon').value);
+ 
     var color = new THREE.Color(0,   1, 0);
     var size = 0.5;
     var heatmapRadius = 10;
+    globeInstance.reset();
+    globeInstance.clearHeatmaps();
 
     // Si no existe la geometría base, créala
-    if (!globeInstance._baseGeometry) {
-        globeInstance._baseGeometry = new THREE.Geometry();
-    }
+  globeInstance._baseGeometry = new THREE.Geometry();
+
 
     // Agrega el nuevo punto a la geometría base
     addPoint(lat, lng, size * 200, color, globeInstance._baseGeometry);
