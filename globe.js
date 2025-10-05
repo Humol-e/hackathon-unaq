@@ -399,7 +399,7 @@ DAT.Globe = function(container, opts) {
  
     var color = new THREE.Color(0,   1, 0);
     var size = 0.5;
-    var heatmapRadius = window.ejectaDist ; // Usa el valor global, o 10 si no existe
+    var heatmapRadius = window.ejectaDist || 10 ; // Usa el valor global, o 10 si no existe
     globeInstance.reset();
     globeInstance.clearHeatmaps();
 
