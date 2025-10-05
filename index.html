@@ -767,6 +767,50 @@ function assessFireRisk(energy, ecosystemData){
   
   return riskWords.none;
 }
+let allAsteroids = [];
+
+async function fetchAsteroids(pages = 3) {
+    allAsteroids = [];
+    for (let i = 0; i < pages; i++) {
+        const response = await fetch(`/asteroids?page=${i}`);
+        if (!response.ok) continue;
+        const data = await response.json();
+        if (!data) continue;
+        allAsteroids = allAsteroids.concat(data.near_earth_objects);
+    }
+}
+
+// Llama a la función al cargar la página
+fetchAsteroids(3);
+
+// Función para buscar y mostrar resultados
+function searchAsteroids() {
+    const query = document.getElementById('asteroidSearch').value.trim().toLowerCase();
+    const results = allAsteroids.filter(ast => ast.name.toLowerCase().includes(query));
+    const resultsList = document.getElementById('asteroidResults');
+    resultsList.innerHTML = '';
+    if (results.length === 0) {
+        resultsList.innerHTML = '<li>No se encontraron asteroides.</li>';
+        return;
+    }
+    results.forEach(ast => {
+        const diamMin = ast.estimated_diameter.kilometers.estimated_diameter_min.toFixed(3);
+        const diamMax = ast.estimated_diameter.kilometers.estimated_diameter_max.toFixed(3);
+        let distancia = 'N/A';
+        if (ast.close_approach_data && ast.close_approach_data.length > 0) {
+            distancia = ast.close_approach_data[0].miss_distance.kilometers;
+        }
+        resultsList.innerHTML += `<li>
+            <strong>${ast.name}</strong> | Diámetro: ${diamMin} - ${diamMax} km | Distancia: ${distancia} km
+        </li>`;
+    });
+}
+
+// Evento para el botón de búsqueda
+document.getElementById('searchAsteroidBtn').addEventListener('click', searchAsteroids);
+document.getElementById('asteroidSearch').addEventListener('keyup', function(e) {
+    if (e.key === 'Enter') searchAsteroids();
+});
 
 function toSeconds(years){return years*365.25*24*3600;}
 
@@ -1119,6 +1163,24 @@ document.getElementById('methodsComparison').innerHTML = methodsHtml;
     loadingImpact.classList.remove('active');
     loadingDeflection.classList.remove('active');
   }
+  let allAsteroids = [];
+
+async function fetchAsteroids(pages = 3) {
+    allAsteroids = [];
+    for (let i = 0; i < pages; i++) {
+        const response = await fetch(`/asteroids?page=${i}`);
+        if (!response.ok) continue;
+        const data = await response.json();
+        if (!data) continue;
+        allAsteroids = allAsteroids.concat(data.near_earth_objects);
+    }
+}
+
+// Llama a la función al cargar la página
+fetchAsteroids(3);
+
+// Función para buscar y mostrar resultados
+
 }
 
 document.getElementById('calcBtn').addEventListener('click', calculateAll);
@@ -1130,5 +1192,8 @@ document.getElementById('calcBtn').addEventListener('click', calculateAll);
   <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
   <script type="text/javascript" src="globe.js"></script>
   <script type="text/javascript" src="main.js"></script>
+    <script type="text/javascript" src="exctract.js"></script>
+
+  
 </body>
 </html>

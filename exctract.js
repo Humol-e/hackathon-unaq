@@ -3,7 +3,7 @@ const express = require('express');
 const fetch = require('node-fetch');
 const app = express();
 const PORT = 3000;
-
+app.use(express.static(__dirname));
 app.get('/asteroids', async (req, res) => {
     const page = req.query.page || 0;
     const apiKey = process.env.API_KEY;
