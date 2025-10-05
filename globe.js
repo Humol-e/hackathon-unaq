@@ -162,7 +162,7 @@ DAT.Globe = function(container, opts) {
   function createHeatmapCircle(lat, lng, radius) {
 
 
-    radius = radius /229000;
+    radius = radius /22900;
     var heatmapGroup = new THREE.Object3D();
     // Crear múltiples anillos concéntricos para simular gradiente suave
     var rings = 15;
