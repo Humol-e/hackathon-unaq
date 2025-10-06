@@ -1,7 +1,15 @@
 ## HACKATHON ##
 
-DESARROLLADO POR DELTA'S MADNESS PARA LA NASA SPACE APP CHALLENGE 2025 REGIÓN COLÓN
+Desarrollado por Delta's Madness, equipo del club de robótica de la Universidad Anáhuac Queretaro
+Conformado por: 
+-Luis Emiliano Castro Reza
+-Diana Gabriela García Ríos
+-Aaron Fernandez Lizarraga
+-Alejandra Tort Gastelum
+-Karla Yelitza Figueroa García
+-Diego Gael Mata Granados
 
+# Funcionamiento #
 1. index.html
 Archivo principal de la interfaz web.
 
